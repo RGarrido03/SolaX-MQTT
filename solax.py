@@ -189,6 +189,8 @@ class VersionEntity(Entity):
         return config
 
 
+status = StatusEntity("Inverter Operation Mode", 10)
+
 entities = [
     TemperatureEntity("Inverter Temperature", 55),
     EnergyEntity("Energy Today", "mdi:solar-panel", 13, 10, "measurement"),
@@ -200,7 +202,7 @@ entities = [
     CurrentEntity("AC Current", 1),
     PowerEntity("AC Power", "mdi:solar-panel", 2),
     FrequencyEntity("AC Frequency", 9),
-    StatusEntity("Inverter Operation Mode", 10),
+    status,
     PowerEntity("Feed-in Power", "mdi:transmission-tower", 48),
     EnergyEntity(
         "Feed-in Energy", "mdi:home-export-outline", 50, 100, "total_increasing"
@@ -222,7 +224,6 @@ def fetch_solax_data(ip: str, password: str) -> dict | None:
         response.raise_for_status()
         return response.json()
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError):
-        logging.error("SolaX inverter is probably offline")
         return None
     except Exception as err:
         logging.error(f"SolaX request error: {type(err)}")
@@ -261,6 +262,7 @@ if __name__ == "__main__":
     mqtt_username = os.environ.get("MQTT_USERNAME")
     mqtt_password = os.environ.get("MQTT_PASSWORD")
     time_delay = int(os.environ.get("TIME_DELAY", 5))
+    offline_delay = int(os.environ.get("OFFLINE_DELAY", 60))
 
     client = connect_mqtt(mqtt_ip, mqtt_username, mqtt_password)
 
@@ -276,10 +278,23 @@ if __name__ == "__main__":
             retain=True,
         )
 
+    retries = 0
+
     while True:
         try:
             data = fetch_solax_data(solax_ip, solax_password)
-            if data is not None:
+
+            if data is None:
+                retries += 1
+                if retries > 3:
+                    logging.info(
+                        f"Inverter is offline. Retrying in {offline_delay} seconds."
+                    )
+                    publish_to_mqtt(client, status.topic, "Offline")
+                    time.sleep(offline_delay)
+                    continue
+            else:
+                retries = 0
                 for entity in entities:
                     entity.state = data
                     publish_to_mqtt(client, entity.topic, entity.state)
