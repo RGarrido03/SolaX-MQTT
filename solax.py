@@ -153,6 +153,9 @@ class StatusEntity(Entity):
 class PowerCalcEntity(PowerEntity):
     def __init__(self, name: str, icon: str, idx1: float, idx2: float):
         super().__init__(name, icon, idx1)
+        self.id = name.replace(" ", "_").replace("-", "").lower()
+        self.topic = f"homeassistant/sensor/{self.id}/state"
+        self.config_topic = f"homeassistant/sensor/{self.id}/config"
         self.idx2 = idx2
 
     @property
