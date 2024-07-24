@@ -1,0 +1,11 @@
+services:
+  solax2mqtt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SOLAX_IP: changeme
+      SOLAX_PASSWORD: changeme
+      MQTT_IP: changeme
+      MQTT_USERNAME: changeme
+      MQTT_PASSWORD: changeme
