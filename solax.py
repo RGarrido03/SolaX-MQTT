@@ -150,6 +150,23 @@ class StatusEntity(Entity):
         self._state = status_map.get(v, "Unknown")
 
 
+class PowerCalcEntity(PowerEntity):
+    def __init__(self, name: str, icon: str, idx1: float, idx2: float):
+        super().__init__(name, icon, idx1)
+        self.idx2 = idx2
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, value: dict):
+        ac = value[self.data_type.value][self.idx] / self.factor
+        feedin_aux = value[self.data_type.value][self.idx2] / self.factor
+        feedin_power = feedin_aux if feedin_aux < 32768 else feedin_aux - 65536
+        self._state = ac - feedin_power
+
+
 class VersionEntity(Entity):
     def __init__(self, name: str, idx: float):
         super().__init__(name, None, "mdi:sync", idx, 1, None, DataType.INFORMATION)
@@ -183,6 +200,7 @@ entities = [
     ),
     VersionEntity("Inverter Version DSP", 4),
     VersionEntity("Inverter Version ARM", 6),
+    PowerCalcEntity("Home Consumption Power", "mdi:home", 2, 48),
 ]
 
 
