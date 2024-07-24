@@ -169,6 +169,13 @@ class PowerCalcEntity(PowerEntity):
         feedin_power = feedin_aux if feedin_aux < 32768 else feedin_aux - 65536
         self._state = ac - feedin_power
 
+    @override
+    @property
+    def ha_config(self) -> dict:
+        config = super().ha_config
+        config["object_id"] = self.id
+        return config
+
 
 class VersionEntity(Entity):
     def __init__(self, name: str, idx: float):
