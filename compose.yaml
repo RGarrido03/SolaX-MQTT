@@ -1,8 +1,7 @@
 services:
   solax2mqtt:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/rgarrido03/solax-mqtt:latest
+    restart: unless-stopped
     environment:
       SOLAX_IP: changeme
       SOLAX_PASSWORD: changeme
