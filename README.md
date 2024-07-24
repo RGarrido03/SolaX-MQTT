@@ -1,7 +1,13 @@
-# SolaX polling to MQTT
+# SolaX2MQTT
 
 This script polls a SolaX inverter for its current status and publishes it to an MQTT broker.
 The default time between polls is 5 seconds, although this can be changed.
+
+> [!Note]
+> This script is only tested with a SolaX X1 Mini G3 solar inverter.
+> It may work with other SolaX models that feature data type 4.
+> 
+> Check [this repo](https://github.com/nazar-pc/solax-local-api-docs) for more information on data types.
 
 ## Installation
 This script is Dockerized, so you can run it in a container, without dealing with dependencies.
