@@ -9,6 +9,8 @@ from typing import Any, override
 import paho.mqtt.client as mqtt
 import requests
 
+logging.basicConfig(level=logging.INFO)
+
 
 class DataType(Enum):
     DATA = "Data"
