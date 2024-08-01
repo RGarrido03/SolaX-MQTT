@@ -296,6 +296,11 @@ if __name__ == "__main__":
                     continue
             else:
                 retries = 0
+                if data["Data"][50] == 0 and data["Data"][52] == 0:
+                    logging.info(
+                        f"Inverter is initializing. Retrying in {time_delay} seconds."
+                    )
+                    continue
                 for entity in entities:
                     entity.state = data
                     publish_to_mqtt(client, entity.topic, entity.state)
