@@ -27,11 +27,12 @@ This script is Dockerized, so you can run it in a container, without dealing wit
 ## Configuration
 The script requires the following environment variables to be set:
 
-| Environment variable | Description                          |
-|----------------------|--------------------------------------|
-| `SOLAX_IP`           | IP of the SolaX inverter             |
-| `SOLAX_PASSWORD`     | Inverter password (i.e., the SN)     |
-| `MQTT_IP`            | IP of the MQTT broker                |
-| `MQTT_USERNAME`      | Username of MQTT broker              |
-| `MQTT_PASSWORD`      | Password of MQTT broker              |
-| `TIME_DELAY`         | Interval between polls (default: 5s) |
+| Environment variable | Description                                        |
+|----------------------|----------------------------------------------------|
+| `SOLAX_IP`           | IP of the SolaX inverter                           |
+| `SOLAX_PASSWORD`     | Inverter password (i.e., the SN)                   |
+| `MQTT_IP`            | IP of the MQTT broker                              |
+| `MQTT_USERNAME`      | Username of MQTT broker                            |
+| `MQTT_PASSWORD`      | Password of MQTT broker                            |
+| `TIME_DELAY`         | Interval between polls (default: 5s)               |
+| `OFFLINE_DELAY`      | Interval between polls when offline (default: 60s) |
