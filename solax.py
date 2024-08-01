@@ -287,8 +287,7 @@ if __name__ == "__main__":
             data = fetch_solax_data(solax_ip, solax_password)
 
             if data is None:
-                retries += 1
-                if retries > 3:
+                if (retries := retries + 1) > 3:
                     logging.info(
                         f"Inverter is offline. Retrying in {offline_delay} seconds."
                     )
