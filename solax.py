@@ -46,6 +46,7 @@ class Entity(ABC):
         self.id = "solax_" + name.replace(" ", "_").replace("-", "").lower()
         self.topic = f"homeassistant/sensor/{self.id}/state"
         self.config_topic = f"homeassistant/sensor/{self.id}/config"
+        self.state_class = "measurement"
         self.name = name
         self.device_class = device_class
         self.icon = icon
@@ -71,6 +72,7 @@ class Entity(ABC):
             "unique_id": self.id,
             "icon": self.icon,
             "device_class": self.device_class if self.device_class else None,
+            "state_class": self.state_class,
             "unit_of_measurement": self.unit if self.unit else None,
             "device": {
                 "identifiers": ["Solax_X1_Mini_G3"],
@@ -91,17 +93,9 @@ class EnergyEntity(Entity):
         icon: str,
         idx: float,
         factor: int,
-        state_class: str,
     ):
         super().__init__(name, "energy", icon, idx, factor, "kWh")
-        self.state_class = state_class
-
-    @override
-    @property
-    def ha_config(self) -> dict:
-        config = super().ha_config
-        config["state_class"] = self.state_class
-        return config
+        self.state_class = "total_increasing"
 
 
 class PowerEntity(Entity):
@@ -193,8 +187,8 @@ class VersionEntity(Entity):
 
 entities = [
     TemperatureEntity("Inverter Temperature", 55),
-    EnergyEntity("Energy Today", "mdi:solar-panel", 13, 10, "measurement"),
-    EnergyEntity("Energy Total", "mdi:chart-line", 11, 10, "total_increasing"),
+    EnergyEntity("Energy Today", "mdi:solar-panel", 13, 10),
+    EnergyEntity("Energy Total", "mdi:chart-line", 11, 10),
     VoltageEntity("DC Voltage 1", 3),
     CurrentEntity("DC Current 1", 5),
     PowerEntity("DC Power 1", "mdi:power-socket-de", 7),
@@ -204,12 +198,8 @@ entities = [
     FrequencyEntity("AC Frequency", 9),
     status := StatusEntity("Inverter Operation Mode", 10),
     PowerEntity("Feed-in Power", "mdi:transmission-tower", 48),
-    EnergyEntity(
-        "Feed-in Energy", "mdi:home-export-outline", 50, 100, "total_increasing"
-    ),
-    EnergyEntity(
-        "Consume Energy", "mdi:home-import-outline", 52, 100, "total_increasing"
-    ),
+    EnergyEntity("Feed-in Energy", "mdi:home-export-outline", 50, 100),
+    EnergyEntity("Consume Energy", "mdi:home-import-outline", 52, 100),
     VersionEntity("Inverter Version DSP", 4),
     VersionEntity("Inverter Version ARM", 6),
     PowerCalcEntity("Home Consumption Power", "mdi:home", 2, 48),
