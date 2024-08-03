@@ -191,8 +191,6 @@ class VersionEntity(Entity):
         return config
 
 
-status = StatusEntity("Inverter Operation Mode", 10)
-
 entities = [
     TemperatureEntity("Inverter Temperature", 55),
     EnergyEntity("Energy Today", "mdi:solar-panel", 13, 10, "measurement"),
@@ -204,7 +202,7 @@ entities = [
     CurrentEntity("AC Current", 1),
     PowerEntity("AC Power", "mdi:solar-panel", 2),
     FrequencyEntity("AC Frequency", 9),
-    status,
+    status := StatusEntity("Inverter Operation Mode", 10),
     PowerEntity("Feed-in Power", "mdi:transmission-tower", 48),
     EnergyEntity(
         "Feed-in Energy", "mdi:home-export-outline", 50, 100, "total_increasing"
