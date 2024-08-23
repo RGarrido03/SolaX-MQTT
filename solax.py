@@ -248,7 +248,7 @@ def connect_mqtt(
         client.username_pw_set(username, password)
     try:
         client.connect(broker)
-        client.on_disconnect = lambda c, userdata, rc: c.reconnect()
+        client.on_disconnect = lambda client, userdata, rc: client.reconnect()
         return client
     except Exception as err:
         logging.error(f"MQTT connection error: {err}")
