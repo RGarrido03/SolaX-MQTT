@@ -42,6 +42,7 @@ class Entity(ABC):
         factor: int,
         unit: str | None,
         data_type: DataType = DataType.DATA,
+        skip_init: bool = False,
     ):
         self.id = "solax_" + name.replace(" ", "_").replace("-", "").lower()
         self.topic = f"homeassistant/sensor/{self.id}/state"
@@ -55,6 +56,7 @@ class Entity(ABC):
         self.factor = factor
         self._state = 0
         self.data_type = data_type
+        self.skip_init = skip_init
 
     @property
     def state(self):
@@ -63,6 +65,8 @@ class Entity(ABC):
     @state.setter
     def state(self, value: dict):
         self._state = value[self.data_type.value][self.idx] / self.factor
+        if self.skip_init and self._state == 0:
+            raise ValueError("Initialization value")
 
     @property
     def ha_config(self) -> dict:
@@ -93,8 +97,9 @@ class EnergyEntity(Entity):
         icon: str,
         idx: float,
         factor: int,
+        skip_init: bool = False,
     ):
-        super().__init__(name, "energy", icon, idx, factor, "kWh")
+        super().__init__(name, "energy", icon, idx, factor, "kWh", skip_init=skip_init)
         self.state_class = "total_increasing"
 
 
@@ -113,13 +118,23 @@ class PowerEntity(Entity):
 
 
 class FrequencyEntity(Entity):
-    def __init__(self, name: str, idx: float):
-        super().__init__(name, "frequency", "mdi:music-clef-treble", idx, 100, "Hz")
+    def __init__(self, name: str, idx: float, skip_init: bool = False):
+        super().__init__(
+            name,
+            "frequency",
+            "mdi:music-clef-treble",
+            idx,
+            100,
+            "Hz",
+            skip_init=skip_init,
+        )
 
 
 class VoltageEntity(Entity):
-    def __init__(self, name: str, idx: float):
-        super().__init__(name, "voltage", "mdi:current-ac", idx, 10, "V")
+    def __init__(self, name: str, idx: float, skip_init: bool = False):
+        super().__init__(
+            name, "voltage", "mdi:current-ac", idx, 10, "V", skip_init=skip_init
+        )
 
 
 class CurrentEntity(Entity):
@@ -189,18 +204,18 @@ class VersionEntity(Entity):
 entities = [
     TemperatureEntity("Inverter Temperature", 55),
     EnergyEntity("Energy Today", "mdi:solar-panel", 13, 10),
-    EnergyEntity("Energy Total", "mdi:chart-line", 11, 10),
+    EnergyEntity("Energy Total", "mdi:chart-line", 11, 10, skip_init=True),
     VoltageEntity("DC Voltage 1", 3),
     CurrentEntity("DC Current 1", 5),
     PowerEntity("DC Power 1", "mdi:power-socket-de", 7),
-    VoltageEntity("AC Output Voltage", 0),
+    VoltageEntity("AC Output Voltage", 0, skip_init=True),
     CurrentEntity("AC Current", 1),
     PowerEntity("AC Power", "mdi:solar-panel", 2),
-    FrequencyEntity("AC Frequency", 9),
+    FrequencyEntity("AC Frequency", 9, skip_init=True),
     status := StatusEntity("Inverter Operation Mode", 10),
     PowerEntity("Feed-in Power", "mdi:transmission-tower", 48),
-    EnergyEntity("Feed-in Energy", "mdi:home-export-outline", 50, 100),
-    EnergyEntity("Consume Energy", "mdi:home-import-outline", 52, 100),
+    EnergyEntity("Feed-in Energy", "mdi:home-export-outline", 50, 100, skip_init=True),
+    EnergyEntity("Consume Energy", "mdi:home-import-outline", 52, 100, skip_init=True),
     VersionEntity("Inverter Version DSP", 4),
     VersionEntity("Inverter Version ARM", 6),
     PowerCalcEntity("Home Consumption Power", "mdi:home", 2, 48),
@@ -287,8 +302,11 @@ if __name__ == "__main__":
             else:
                 retries = 0
                 for entity in entities:
-                    entity.state = data
-                    publish_to_mqtt(client, entity.topic, entity.state)
+                    try:
+                        entity.state = data
+                        publish_to_mqtt(client, entity.topic, entity.state)
+                    except ValueError:
+                        logging.warning(f"Skipping {entity.name} initialization value")
             time.sleep(time_delay)
         except KeyboardInterrupt:
             break
