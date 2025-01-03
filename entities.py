@@ -15,6 +15,7 @@ class Entity(ABC):
         unit: str | None,
         data_type: DataType = DataType.DATA,
         skip_init: bool = False,
+        should_fallback: bool = False,
     ):
         self.id = "solax_" + name.replace(" ", "_").replace("-", "").lower()
         self.topic = f"homeassistant/sensor/{self.id}/state"
@@ -29,6 +30,7 @@ class Entity(ABC):
         self._state = 0
         self.data_type = data_type
         self.skip_init = skip_init
+        self.should_fallback = should_fallback
 
     @property
     def state(self):
@@ -39,6 +41,10 @@ class Entity(ABC):
         self._state = value[self.data_type.value][self.idx] / self.factor
         if self.skip_init and self._state == 0:
             raise ValueError("Initialization value")
+
+    @property
+    def fallback_state(self):
+        return 0 if self.should_fallback else self.state
 
     @property
     def ha_config(self) -> dict:
@@ -77,7 +83,7 @@ class EnergyEntity(Entity):
 
 class PowerEntity(Entity):
     def __init__(self, name: str, icon: str, idx: float):
-        super().__init__(name, "power", icon, idx, 1, "W")
+        super().__init__(name, "power", icon, idx, 1, "W", should_fallback=True)
 
     @property
     def state(self):
@@ -111,7 +117,9 @@ class VoltageEntity(Entity):
 
 class CurrentEntity(Entity):
     def __init__(self, name: str, idx: float):
-        super().__init__(name, "current", "mdi:current-ac", idx, 10, "A")
+        super().__init__(
+            name, "current", "mdi:current-ac", idx, 10, "A", should_fallback=True
+        )
 
 
 class TemperatureEntity(Entity):
@@ -132,6 +140,10 @@ class StatusEntity(Entity):
     def state(self, value: dict):
         v = value[self.data_type.value][self.idx] / self.factor
         self._state = status_map.get(v, "Unknown")
+
+    @property
+    def fallback_state(self):
+        return "Offline" if self.should_fallback else self.state
 
 
 class PowerCalcEntity(PowerEntity):

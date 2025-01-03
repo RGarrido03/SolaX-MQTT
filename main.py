@@ -21,7 +21,7 @@ entities = [
     CurrentEntity("AC Current", 1),
     PowerEntity("AC Power", "mdi:solar-panel", 2),
     FrequencyEntity("AC Frequency", 9, skip_init=True),
-    status := StatusEntity("Inverter Operation Mode", 10),
+    StatusEntity("Inverter Operation Mode", 10),
     PowerEntity("Feed-in Power", "mdi:transmission-tower", 48),
     EnergyEntity("Feed-in Energy", "mdi:home-export-outline", 50, 100, skip_init=True),
     EnergyEntity("Consume Energy", "mdi:home-import-outline", 52, 100, skip_init=True),
@@ -57,21 +57,25 @@ while True:
         data = fetch_solax_data(solax_ip, solax_password)
 
         if data is None:
-            if (retries := retries + 1) > 3:
-                logging.info(
-                    f"Inverter is offline. Retrying in {offline_delay} seconds."
-                )
-                publish_to_mqtt(client, status.topic, "Offline")
-                time.sleep(offline_delay)
-                continue
-        else:
-            retries = 0
-            for entity in entities:
-                try:
-                    entity.state = data
-                    publish_to_mqtt(client, entity.topic, entity.state)
-                except ValueError:
-                    logging.warning(f"Skipping {entity.name} initialization value")
+            if (retries := retries + 1) == 3:
+                logging.info("Inverter is offline")
+                for entity in entities:
+                    publish_to_mqtt(
+                        client, entity.topic, entity.fallback_state, retain=True
+                    )
+            time.sleep(time_delay if retries < 3 else offline_delay)
+            continue
+
+        if retries > 0:
+            logging.info("Inverter is online")
+        retries = 0
+
+        for entity in entities:
+            try:
+                entity.state = data
+                publish_to_mqtt(client, entity.topic, entity.state)
+            except ValueError:
+                logging.warning(f"Skipping {entity.name} initialization value")
         time.sleep(time_delay)
     except KeyboardInterrupt:
         client.disconnect()
