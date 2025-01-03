@@ -1,10 +1,8 @@
-FROM python:3.12
+FROM python:3.13
 WORKDIR /app
+ENV PYTHONUNBUFFERED 1
 
-COPY requirements.txt .
-COPY solax.py .
+COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV PYTHONUNBUFFERED=1
-
-CMD ["python", "./solax.py"]
+CMD ["python", "./main.py"]
