@@ -129,7 +129,7 @@ class TemperatureEntity(Entity):
 
 class StatusEntity(Entity):
     def __init__(self, name: str, idx: float):
-        super().__init__(name, None, "mdi:check", idx, 1, None)
+        super().__init__(name, None, "mdi:check", idx, 1, None, should_fallback=True)
         self.state_class = None
 
     @property
