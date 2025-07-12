@@ -51,13 +51,14 @@ for entity in entities:
     )
 
 retries = 0
+initialized = False
 
 while True:
     try:
         data = fetch_solax_data(solax_ip, solax_password)
 
         if data is None:
-            if (retries := retries + 1) == 3:
+            if (retries := retries + 1) == 3 and initialized:
                 logging.info("Inverter is offline")
                 for entity in entities:
                     publish_to_mqtt(
@@ -69,6 +70,7 @@ while True:
         if retries > 0:
             logging.info("Inverter is online")
         retries = 0
+        initialized = True
 
         for entity in entities:
             try:
