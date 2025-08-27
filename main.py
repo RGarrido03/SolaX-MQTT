@@ -14,20 +14,10 @@ entities = [
     TemperatureEntity("Inverter Temperature", 55),
     EnergyEntity("Energy Today", "mdi:solar-panel", 13, 10),
     EnergyEntity("Energy Total", "mdi:chart-line", 11, 10, skip_init=True),
-    VoltageEntity("DC Voltage 1", 3),
-    CurrentEntity("DC Current 1", 5),
-    PowerEntity("DC Power 1", "mdi:power-socket-de", 7),
-    VoltageEntity("AC Output Voltage", 0, skip_init=True),
-    CurrentEntity("AC Current", 1),
     PowerEntity("AC Power", "mdi:solar-panel", 2),
-    FrequencyEntity("AC Frequency", 9, skip_init=True),
     StatusEntity("Inverter Operation Mode", 10),
-    PowerEntity("Feed-in Power", "mdi:transmission-tower", 48),
-    EnergyEntity("Feed-in Energy", "mdi:home-export-outline", 50, 100, skip_init=True),
-    EnergyEntity("Consume Energy", "mdi:home-import-outline", 52, 100, skip_init=True),
     VersionEntity("Inverter Version DSP", 4),
     VersionEntity("Inverter Version ARM", 6),
-    PowerCalcEntity("Home Consumption Power", "mdi:home", 2, 48),
 ]
 
 
